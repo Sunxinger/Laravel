@@ -3,6 +3,9 @@
 namespace App\Http\Controllers;
 
 use App\Models\Post;
+use App\Mail\PostUpdatedMail;
+use Illuminate\Support\Facades\Mail;
+use App\Models\User;
 use Illuminate\Validation\Rule;
 
 class AdminPostController extends Controller
@@ -43,6 +46,12 @@ class AdminPostController extends Controller
         }
 
         $post->update($attributes);
+
+        // 发送邮件给所有用户
+        $users = User::all();
+        foreach ($users as $user) {
+            Mail::to($user->email)->send(new PostUpdatedMail($post));
+        }
 
         return back()->with('success', 'Post Updated!');
     }
